@@ -28,9 +28,18 @@ A lightweight CLI tool to parse and analyze Nginx/Apache log files using Regular
    cd py-log-analyzer
    ```
 
-2. Install dependencies:
+2. (Recommended) Create and activate a virtual environment:
    ```bash
-   pip install rich
+   python -m venv venv
+   # Windows:
+   .\venv\Scripts\activate
+   # Linux/macOS:
+   source venv/bin/activate
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
    ```
 
 ## Usage
