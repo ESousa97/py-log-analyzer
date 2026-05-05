@@ -1,88 +1,97 @@
 # Python Log Analyzer
 
 ![Python CI](https://github.com/esousa97/py-log-analyzer/actions/workflows/ci.yml/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 
-A lightweight CLI tool to parse and analyze Nginx/Apache log files with high performance and parallel processing.
+A high-performance, modular CLI tool to parse and analyze Nginx/Apache log files. Designed for scalability, it handles large log files efficiently using Python generators and parallel processing.
 
-## Features
+## 🚀 Features
 
-- **High Performance**: Uses Python generators to read files line-by-line, minimizing RAM usage.
-- **Parallel Processing**: Automatically utilizes multiple CPU cores to process multiple log files simultaneously using `multiprocessing`.
-- **Detailed Parsing**: Extracts IP, Timestamp, Method, URL, and Status Code.
-- **Anomaly Detection**: Identifies suspicious IP activity (brute force/scrapers) and monitors service health.
-- **Report Export**: Export results to structured **JSON** or interactive **HTML** dashboards with Chart.js.
-- **Docker Ready**: Run as an isolated utility without local Python installation.
+- **Performance First**: Memory-efficient processing via generators and multi-core scalability via `multiprocessing`.
+- **Modular Architecture**: Clean, extensible code structure following Python best practices.
+- **Anomaly Detection**: Automatically identifies suspicious IP activity (401/404 spikes).
+- **Service Health Alerts**: Real-time monitoring with configurable 5xx error thresholds.
+- **Rich Visualization**: 
+  - Elegant terminal tables powered by `rich`.
+  - Interactive HTML dashboards with Chart.js.
+  - Structured JSON exports for data integration.
+- **Modern Tooling**: Fully integrated with `ruff` for linting, `pytest` for testing, and `GitHub Actions` for CI/CD.
+- **Docker Ready**: Run anywhere as an isolated utility.
 
-## Requirements
+## 🛠️ Installation
 
-- Python 3.x
-- `rich` library
+### Local Setup
 
-## Installation
-
-### Local Installation
-
-1. Clone the repository:
+1. **Clone the repository**:
    ```bash
    git clone https://github.com/esousa97/py-log-analyzer.git
    cd py-log-analyzer
    ```
 
-2. (Recommended) Create and activate a virtual environment:
+2. **Setup virtual environment**:
    ```bash
    python -m venv venv
    source venv/bin/activate  # Linux/macOS
    # .\venv\Scripts\activate # Windows
    ```
 
-3. Install dependencies:
+3. **Install dependencies**:
    ```bash
    pip install -r requirements.txt
+   pip install .
    ```
 
-### Docker Installation
+### Docker
 
-Build the image locally:
 ```bash
 docker build -t py-log-analyzer .
 ```
 
-## Usage
+## 📖 Usage
 
-### Local Usage
+### CLI Commands
 
-Run the script providing one or more log files:
+The tool can be run directly if installed via `pip install .`, or via `python -m py_log_analyzer`.
 
 ```bash
-python py_log_analyzer.py access.log access.log.1 [options]
+# Basic analysis of multiple files
+py-log-analyzer access.log access.log.1
+
+# Export to HTML with custom error threshold
+py-log-analyzer access.log --format html --threshold 2.5
 ```
 
 ### Docker Usage
 
-Mount your logs directory and run the container:
+```bash
+docker run --rm -v $(pwd):/logs py-log-analyzer /logs/access.log --format json
+```
+
+## 🧪 Development
+
+We value code quality and testing.
 
 ```bash
-docker run --rm -v $(pwd):/logs py_log_analyzer /logs/access.log --format html
+# Install dev dependencies
+pip install -r requirements-dev.txt
+
+# Run tests with coverage
+pytest --cov=py_log_analyzer
+
+# Lint and format
+ruff check .
+ruff format .
 ```
 
-### Options
+## 🤝 Contributing
 
-- `--threshold <float>`: 5xx error rate threshold for critical alert (default: `5.0`).
-- `--format {json,html}`: Export the report to `report.json` or `report.html`.
+Contributions are welcome! Please check our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get started.
 
-## Output Example
+## 📜 License
 
-The tool displays elegant tables in the terminal and generates interactive reports:
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-```text
-Anomaly Detected: Suspicious IP Activity
-┏━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┓
-┃ IP Address  ┃ 401/404 Errors ┃
-┡━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━┩
-│ 10.10.10.10 │             52 │
-└─────────────┴────────────────┘
-```
+## 📝 Changelog
 
-## License
-
-MIT License
+See [CHANGELOG.md](CHANGELOG.md) for a history of changes.
