@@ -12,5 +12,5 @@ setup(
             "py-log-analyzer=py_log_analyzer.cli:run",
         ],
     },
-    python_requires=">=3.9",
+    python_requires=">=3.10",
 )

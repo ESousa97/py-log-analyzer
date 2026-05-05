@@ -8,7 +8,7 @@
   <br>
 
 [![CI](https://github.com/esousa97/py-log-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/esousa97/py-log-analyzer/actions/workflows/ci.yml)
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=flat&logo=python&logoColor=white)](https://github.com/esousa97/py-log-analyzer/blob/master/pyproject.toml)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat&logo=python&logoColor=white)](https://github.com/esousa97/py-log-analyzer/blob/master/pyproject.toml)
 [![Rich](https://img.shields.io/badge/rich-15.0%2B-green?style=flat&logo=python&logoColor=white)](https://github.com/Textualize/rich)
 [![License](https://img.shields.io/github/license/esousa97/py-log-analyzer)](https://github.com/esousa97/py-log-analyzer/blob/master/LICENSE)
 [![Last Commit](https://img.shields.io/github/last-commit/esousa97/py-log-analyzer)](https://github.com/esousa97/py-log-analyzer/commits/master)
@@ -60,14 +60,14 @@ py-log-analyzer access.log --format html --threshold 2.5
 
 | Component | Role |
 | --------- | ---- |
-| Python 3.9+ | Language and runtime |
+| Python 3.10+ | Language and runtime |
 | rich | Terminal UI and tables |
 | Chart.js | Interactive HTML visualizations |
 | pytest | Unit testing and coverage |
 
 ## Prerequisites
 
-- Python **3.9+** and `pip`.
+- Python **3.10+** and `pip`.
 - Optional: **Docker** for containerized execution.
 
 ## Installation and usage
