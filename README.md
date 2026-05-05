@@ -1,97 +1,170 @@
-# Python Log Analyzer
+<div align="center">
+<h1>py-log-analyzer</h1>
 
-![Python CI](https://github.com/esousa97/py-log-analyzer/actions/workflows/ci.yml/badge.svg)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+<p>High-performance modular CLI tool to parse, analyze and audit Nginx/Apache logs with interactive dashboards and anomaly detection.</p>
 
-A high-performance, modular CLI tool to parse and analyze Nginx/Apache log files. Designed for scalability, it handles large log files efficiently using Python generators and parallel processing.
+  <br>
 
-## 🚀 Features
+[![CI](https://github.com/esousa97/py-log-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/esousa97/py-log-analyzer/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=flat&logo=python&logoColor=white)](https://github.com/esousa97/py-log-analyzer/blob/master/pyproject.toml)
+[![Rich](https://img.shields.io/badge/rich-15.0%2B-green?style=flat&logo=python&logoColor=white)](https://github.com/Textualize/rich)
+[![License](https://img.shields.io/github/license/esousa97/py-log-analyzer)](https://github.com/esousa97/py-log-analyzer/blob/master/LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/esousa97/py-log-analyzer)](https://github.com/esousa97/py-log-analyzer/commits/master)
 
-- **Performance First**: Memory-efficient processing via generators and multi-core scalability via `multiprocessing`.
-- **Modular Architecture**: Clean, extensible code structure following Python best practices.
-- **Anomaly Detection**: Automatically identifies suspicious IP activity (401/404 spikes).
-- **Service Health Alerts**: Real-time monitoring with configurable 5xx error thresholds.
-- **Rich Visualization**: 
-  - Elegant terminal tables powered by `rich`.
-  - Interactive HTML dashboards with Chart.js.
-  - Structured JSON exports for data integration.
-- **Modern Tooling**: Fully integrated with `ruff` for linting, `pytest` for testing, and `GitHub Actions` for CI/CD.
-- **Docker Ready**: Run anywhere as an isolated utility.
+</div>
 
-## 🛠️ Installation
+---
 
-### Local Setup
+**py-log-analyzer** is a command-line tool designed for high-performance analysis of web server logs (Nginx/Apache). It features memory-efficient parsing using generators, parallel file processing via multiprocessing, and comprehensive reporting. It identifies traffic patterns, status code distributions, and suspicious IP activity (anomalies), exporting results to **JSON** or interactive **HTML dashboards**. The console entry point is `py-log-analyzer`. Canonical repository: `github.com/esousa97/py-log-analyzer`.
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/esousa97/py-log-analyzer.git
-   cd py-log-analyzer
-   ```
+## Demo (quick smoke test)
 
-2. **Setup virtual environment**:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Linux/macOS
-   # .\venv\Scripts\activate # Windows
-   ```
+Analyze a log file and generate an interactive HTML report.
 
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   pip install .
-   ```
+**Linux / macOS (bash)**
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+
+# Run analysis with HTML report
+py-log-analyzer access.log --format html --threshold 2.5
+```
+
+**Windows (PowerShell)**
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -e .
+
+# Run analysis with HTML report
+py-log-analyzer access.log --format html --threshold 2.5
+```
+
+## Features
+
+| Area | What you get |
+| ---- | -------------- |
+| Parsing | High-speed regex parsing of Common Log Format (CLF). |
+| Performance | Memory-efficient generators and multi-core `multiprocessing` support. |
+| Security | Anomaly detection for suspicious IPs (401/404 spikes). |
+| Health | Service health monitoring with configurable 5xx error thresholds. |
+| Export | Interactive **HTML reports** with Chart.js or structured **JSON**. |
+| UI | Elegant terminal tables and panels powered by `rich`. |
+
+## Tech stack
+
+| Component | Role |
+| --------- | ---- |
+| Python 3.9+ | Language and runtime |
+| rich | Terminal UI and tables |
+| Chart.js | Interactive HTML visualizations |
+| pytest | Unit testing and coverage |
+
+## Prerequisites
+
+- Python **3.9+** and `pip`.
+- Optional: **Docker** for containerized execution.
+
+## Installation and usage
+
+### From source (recommended)
+
+```bash
+git clone https://github.com/esousa97/py-log-analyzer.git
+cd py-log-analyzer
+pip install .
+py-log-analyzer --help
+```
 
 ### Docker
 
 ```bash
 docker build -t py-log-analyzer .
+docker run --rm -v "$PWD:/logs" py-log-analyzer /logs/access.log --format html
 ```
 
-## 📖 Usage
+## Documentation
 
-### CLI Commands
+| Document | Contents |
+| -------- | -------- |
+| [LICENSE](LICENSE) | MIT License |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
+| [CHANGELOG.md](CHANGELOG.md) | Version history |
 
-The tool can be run directly if installed via `pip install .`, or via `python -m py_log_analyzer`.
+## CLI summary
 
 ```bash
-# Basic analysis of multiple files
-py-log-analyzer access.log access.log.1
-
-# Export to HTML with custom error threshold
-py-log-analyzer access.log --format html --threshold 2.5
+py-log-analyzer FILES [FILES ...] [--threshold PERCENT] [--format json|html]
 ```
 
-### Docker Usage
+## Tests
 
 ```bash
-docker run --rm -v $(pwd):/logs py-log-analyzer /logs/access.log --format json
-```
-
-## 🧪 Development
-
-We value code quality and testing.
-
-```bash
-# Install dev dependencies
 pip install -r requirements-dev.txt
-
-# Run tests with coverage
 pytest --cov=py_log_analyzer
-
-# Lint and format
-ruff check .
-ruff format .
 ```
 
-## 🤝 Contributing
+## Project layout
 
-Contributions are welcome! Please check our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get started.
+| Path | Role |
+| ---- | ---- |
+| `py_log_analyzer/parser.py` | Log parsing and generators |
+| `py_log_analyzer/analyzer.py` | Data aggregation and anomaly detection |
+| `py_log_analyzer/exporter.py` | JSON and HTML report generation |
+| `py_log_analyzer/cli.py` | CLI orchestration and Terminal UI |
+| `py_log_analyzer/__main__.py` | Module entry point |
+| `tests/` | `pytest` suite |
 
-## 📜 License
+## Troubleshooting
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+| Symptom | Likely cause | What to do |
+| ------- | ------------- | ---------- |
+| `ModuleNotFoundError` | Package not installed | Run `pip install .` or `pip install -e .` |
+| `Permission Denied` | File access issues | Check log file permissions or use `sudo` if necessary. |
+| `MemoryError` | Large file loading | The tool uses generators, but check if `--format html` with extreme log sizes is a factor. |
 
-## 📝 Changelog
+## Study roadmap (completed)
 
-See [CHANGELOG.md](CHANGELOG.md) for a history of changes.
+The implementation roadmap is **finished**.
+
+### Delivered scope
+
+- [x] **Stage 1 — Base CLI & Parsing** — Regex-based CLF parsing and basic terminal output.
+- [x] **Stage 2 — Aggregation & UI** — Top IPs/Paths/Status distributions with `rich` tables.
+- [x] **Stage 3 — Anomaly & Health** — Suspicious IP detection and 5xx health alerts.
+- [x] **Stage 4 — Export & Visualization** — HTML dashboards with Chart.js and JSON export.
+- [x] **Stage 5 — Performance & Scale** — Generators for RAM efficiency and `multiprocessing` for parallel files.
+- [x] **Stage 6 — DevOps & CI/CD** — Dockerization and GitHub Actions for automated testing/linting.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
+
+## License
+
+[MIT](LICENSE).
+
+<div align="center">
+
+## Author
+
+**Enoque Sousa**
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/enoque-sousa-bb89aa168/)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=flat&logo=github&logoColor=white)](https://github.com/esousa97)
+[![Portfolio](https://img.shields.io/badge/Portfolio-FF5722?style=flat&logo=target&logoColor=white)](https://enoquesousa.vercel.app)
+
+**[⬆ Back to Top](#py-log-analyzer)**
+
+Made with ❤️ by [Enoque Sousa](https://github.com/esousa97)
+
+**Project status:** Production Ready — Implementation roadmap completed
+
+</div>
