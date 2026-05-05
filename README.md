@@ -1,22 +1,15 @@
 # Python Log Analyzer
 
-A lightweight CLI tool to parse and analyze Nginx/Apache log files using Regular Expressions.
+A lightweight CLI tool to parse and analyze Nginx/Apache log files with high performance and parallel processing.
 
 ## Features
 
+- **High Performance**: Uses Python generators to read files line-by-line, minimizing RAM usage.
+- **Parallel Processing**: Automatically utilizes multiple CPU cores to process multiple log files simultaneously using `multiprocessing`.
 - **Detailed Parsing**: Extracts IP, Timestamp, Method, URL, and Status Code.
-- **Aggregation Logic**:
-  - **Top 10 IP Addresses**: Identifies the most frequent visitors.
-  - **Status Code Distribution**: Summarizes requests by category (2xx, 3xx, 4xx, 5xx).
-  - **Top 5 Accessed Paths**: Shows the most requested URLs.
-- **Anomaly Detection**:
-  - **Suspicious IP Activity**: Detects IPs with more than 50 errors (401/404).
-  - **Error Rate Calculation**: Calculates the total error percentage.
-  - **Service Health Alerts**: Displays a critical alert if 5xx errors exceed a configurable threshold.
-- **Report Export**:
-  - **JSON**: Export raw analysis data for further processing.
-  - **HTML**: Generate a visually appealing, interactive report with charts (Chart.js) and tables.
-- **Rich Terminal UI**: Displays summaries and alerts in elegant tables and panels using the `rich` library.
+- **Anomaly Detection**: Identifies suspicious IP activity (brute force/scrapers) and monitors service health.
+- **Report Export**: Export results to structured **JSON** or interactive **HTML** dashboards with Chart.js.
+- **Docker Ready**: Run as an isolated utility without local Python installation.
 
 ## Requirements
 
@@ -24,6 +17,8 @@ A lightweight CLI tool to parse and analyze Nginx/Apache log files using Regular
 - `rich` library
 
 ## Installation
+
+### Local Installation
 
 1. Clone the repository:
    ```bash
@@ -34,10 +29,8 @@ A lightweight CLI tool to parse and analyze Nginx/Apache log files using Regular
 2. (Recommended) Create and activate a virtual environment:
    ```bash
    python -m venv venv
-   # Windows:
-   .\venv\Scripts\activate
-   # Linux/macOS:
-   source venv/bin/activate
+   source venv/bin/activate  # Linux/macOS
+   # .\venv\Scripts\activate # Windows
    ```
 
 3. Install dependencies:
@@ -45,12 +38,29 @@ A lightweight CLI tool to parse and analyze Nginx/Apache log files using Regular
    pip install -r requirements.txt
    ```
 
+### Docker Installation
+
+Build the image locally:
+```bash
+docker build -t py-log-analyzer .
+```
+
 ## Usage
 
-Run the script by providing the path to your log file as an argument:
+### Local Usage
+
+Run the script providing one or more log files:
 
 ```bash
-python py-log-analyzer.py <path_to_log_file> [options]
+python py-log-analyzer.py access.log access.log.1 [options]
+```
+
+### Docker Usage
+
+Mount your logs directory and run the container:
+
+```bash
+docker run --rm -v $(pwd):/logs py-log-analyzer /logs/access.log --format html
 ```
 
 ### Options
@@ -58,21 +68,9 @@ python py-log-analyzer.py <path_to_log_file> [options]
 - `--threshold <float>`: 5xx error rate threshold for critical alert (default: `5.0`).
 - `--format {json,html}`: Export the report to `report.json` or `report.html`.
 
-### Examples
+## Output Example
 
-**Standard analysis:**
-```bash
-python py-log-analyzer.py access.log
-```
-
-**Exporting to HTML with custom threshold:**
-```bash
-python py-log-analyzer.py access.log --threshold 2.0 --format html
-```
-
-## Output Example (Terminal)
-
-The tool displays elegant tables and alerts in the terminal:
+The tool displays elegant tables in the terminal and generates interactive reports:
 
 ```text
 Anomaly Detected: Suspicious IP Activity
@@ -81,15 +79,8 @@ Anomaly Detected: Suspicious IP Activity
 ┡━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━┩
 │ 10.10.10.10 │             52 │
 └─────────────┴────────────────┘
-
-       Top 10 IP Addresses
-┏━━━━━━━━━━━━━┳━━━━━━━━━━┓
-┃ IP Address  ┃ Requests ┃
-┡━━━━━━━━━━━━━╇━━━━━━━━━━┩
-│ 127.0.0.1   │       15 │
-└─────────────┴──────────┘
 ```
 
 ## License
 
-This project is open-source and available under the MIT License.
+MIT License

@@ -2,6 +2,7 @@ import argparse
 import re
 import sys
 import json
+import multiprocessing
 from collections import Counter
 from rich.console import Console
 from rich.table import Table
@@ -15,36 +16,59 @@ def parse_log_line(line):
         return match.groupdict()
     return None
 
-def detect_anomalies(logs):
-    suspicious_ips = Counter()
-    for log in logs:
-        if log['status'] in ('401', '404'):
-            suspicious_ips[log['ip']] += 1
-    return {ip: count for ip, count in suspicious_ips.items() if count > 50}
+def log_generator(file_path):
+    """Generator that yields parsed log entries line by line."""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                parsed = parse_log_line(line)
+                if parsed:
+                    yield parsed
+    except Exception as e:
+        print(f"Error reading {file_path}: {e}", file=sys.stderr)
 
-def get_summary_data(logs):
-    ip_counts = Counter(log['ip'] for log in logs)
-    url_counts = Counter(log['url'] for log in logs)
+def process_file(file_path):
+    """Worker function to process a single log file and return aggregated data."""
+    ip_counts = Counter()
+    url_counts = Counter()
+    status_counts = Counter()
+    suspicious_ips = Counter() # For 401/404 errors
+    total_count = 0
     
-    status_categories = {
+    for entry in log_generator(file_path):
+        ip = entry['ip']
+        url = entry['url']
+        status = entry['status']
+        
+        ip_counts[ip] += 1
+        url_counts[url] += 1
+        status_counts[status] += 1
+        total_count += 1
+        
+        if status in ('401', '404'):
+            suspicious_ips[ip] += 1
+            
+    return {
+        "ip_counts": ip_counts,
+        "url_counts": url_counts,
+        "status_counts": status_counts,
+        "suspicious_ips": suspicious_ips,
+        "total_count": total_count
+    }
+
+def get_status_categories(status_counts):
+    categories = {
         "2xx (Success)": 0,
         "3xx (Redirection)": 0,
         "4xx (Client Error)": 0,
         "5xx (Server Error)": 0
     }
-    
-    for log in logs:
-        status = log['status']
-        if status.startswith('2'):
-            status_categories["2xx (Success)"] += 1
-        elif status.startswith('3'):
-            status_categories["3xx (Redirection)"] += 1
-        elif status.startswith('4'):
-            status_categories["4xx (Client Error)"] += 1
-        elif status.startswith('5'):
-            status_categories["5xx (Server Error)"] += 1
-            
-    return ip_counts, url_counts, status_categories
+    for status, count in status_counts.items():
+        if status.startswith('2'): categories["2xx (Success)"] += count
+        elif status.startswith('3'): categories["3xx (Redirection)"] += count
+        elif status.startswith('4'): categories["4xx (Client Error)"] += count
+        elif status.startswith('5'): categories["5xx (Server Error)"] += count
+    return categories
 
 def export_json(report_data, output_file):
     with open(output_file, 'w') as f:
@@ -134,21 +158,29 @@ def export_html(report_data, output_file):
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(html_template)
 
-def display_summary(logs, error_threshold_5xx, export_format=None):
+def display_summary(merged_data, error_threshold_5xx, export_format=None):
     console = Console()
-    total_logs = len(logs)
+    total_requests = merged_data['total_count']
     
-    ip_counts, url_counts, status_categories = get_summary_data(logs)
-    anomalies = detect_anomalies(logs)
+    if total_requests == 0:
+        console.print("[bold yellow]No valid log entries found to analyze.[/bold yellow]")
+        return
+
+    ip_counts = merged_data['ip_counts']
+    url_counts = merged_data['url_counts']
+    status_counts = merged_data['status_counts']
+    suspicious_ips = merged_data['suspicious_ips']
+    
+    status_categories = get_status_categories(status_counts)
+    anomalies = {ip: count for ip, count in suspicious_ips.items() if count > 50}
 
     total_errors = status_categories["4xx (Client Error)"] + status_categories["5xx (Server Error)"]
-    error_rate = (total_errors / total_logs) * 100
-    rate_5xx = (status_categories["5xx (Server Error)"] / total_logs) * 100
+    error_rate = (total_errors / total_requests) * 100
+    rate_5xx = (status_categories["5xx (Server Error)"] / total_requests) * 100
     is_critical = rate_5xx >= error_threshold_5xx
 
-    # Prepare report data
     report_data = {
-        "total_requests": total_logs,
+        "total_requests": total_requests,
         "error_rate": error_rate,
         "rate_5xx": rate_5xx,
         "threshold": error_threshold_5xx,
@@ -159,7 +191,6 @@ def display_summary(logs, error_threshold_5xx, export_format=None):
         "anomalies": anomalies
     }
 
-    # Handle Exports
     if export_format == 'json':
         export_json(report_data, 'report.json')
         console.print("[bold green]Report exported to report.json[/bold green]")
@@ -167,7 +198,6 @@ def display_summary(logs, error_threshold_5xx, export_format=None):
         export_html(report_data, 'report.html')
         console.print("[bold green]Report exported to report.html[/bold green]")
 
-    # Terminal Output
     if anomalies:
         table = Table(title="[bold red]Anomaly Detected: Suspicious IP Activity[/bold red]", border_style="red")
         table.add_column("IP Address", style="bright_red")
@@ -203,37 +233,37 @@ def display_summary(logs, error_threshold_5xx, export_format=None):
     console.print(status_table)
     console.print(url_table)
     
-    console.print(f"\n[bold green]Total requests processed: {total_logs}[/bold green]")
+    console.print(f"\n[bold green]Total requests processed: {total_requests}[/bold green]")
     console.print(f"[bold]Total Error Rate: {error_rate:.2f}%[/bold]")
 
 def main():
-    parser = argparse.ArgumentParser(description="Analyze Nginx/Apache log files.")
-    parser.add_argument("file", help="Path to the log file")
+    parser = argparse.ArgumentParser(description="Analyze Nginx/Apache log files with performance optimizations.")
+    parser.add_argument("files", nargs='+', help="Path to one or more log files")
     parser.add_argument("--threshold", type=float, default=5.0, help="5xx error threshold for critical health alert (default: 5.0%%)")
     parser.add_argument("--format", choices=['json', 'html'], help="Export format for the analysis report")
     args = parser.parse_args()
 
-    logs = []
-    try:
-        with open(args.file, 'r') as f:
-            for line in f:
-                parsed = parse_log_line(line)
-                if parsed:
-                    logs.append(parsed)
-                else:
-                    if line.strip():
-                        print(f"Warning: Could not parse line: {line.strip()}", file=sys.stderr)
-    except FileNotFoundError:
-        print(f"Error: File '{args.file}' not found.")
-        sys.exit(1)
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        sys.exit(1)
+    # Process files in parallel
+    with multiprocessing.Pool() as pool:
+        results = pool.map(process_file, args.files)
 
-    if logs:
-        display_summary(logs, args.threshold, args.format)
-    else:
-        print("No valid log entries found.")
+    # Merge results from all files
+    merged_data = {
+        "ip_counts": Counter(),
+        "url_counts": Counter(),
+        "status_counts": Counter(),
+        "suspicious_ips": Counter(),
+        "total_count": 0
+    }
+
+    for res in results:
+        merged_data["ip_counts"].update(res["ip_counts"])
+        merged_data["url_counts"].update(res["url_counts"])
+        merged_data["status_counts"].update(res["status_counts"])
+        merged_data["suspicious_ips"].update(res["suspicious_ips"])
+        merged_data["total_count"] += res["total_count"]
+
+    display_summary(merged_data, args.threshold, args.format)
 
 if __name__ == "__main__":
     main()
