@@ -1,5 +1,7 @@
 [tool.ruff]
-line-length = 100
+line-length = 200
+
+[tool.ruff.lint]
 select = ["E", "F", "W", "I", "B"]
 ignore = []
 
@@ -12,5 +14,5 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 
 [tool.coverage.run]
-source = ["."]
+source = ["py_log_analyzer"]
 omit = ["tests/*"]

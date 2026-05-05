@@ -6,8 +6,12 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application script
-COPY py_log_analyzer.py .
+# Copy application package
+COPY py_log_analyzer/ ./py_log_analyzer/
+COPY setup.py .
+
+# Install the package
+RUN pip install .
 
 # Entrypoint for the CLI utility
-ENTRYPOINT ["python", "py_log_analyzer.py"]
+ENTRYPOINT ["py-log-analyzer"]
