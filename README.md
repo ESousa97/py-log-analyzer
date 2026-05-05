@@ -4,27 +4,30 @@ A lightweight CLI tool to parse and analyze Nginx/Apache log files using Regular
 
 ## Features
 
-- Extracts key fields from log files:
-  - Source IP Address
-  - Timestamp (Date/Time)
-  - HTTP Method (GET, POST, etc.)
-  - Requested URL
-  - HTTP Status Code
-- Stores results in a structured list of dictionaries.
-- Easy-to-use Command Line Interface (CLI).
+- **Detailed Parsing**: Extracts IP, Timestamp, Method, URL, and Status Code.
+- **Aggregation Logic**:
+  - **Top 10 IP Addresses**: Identifies the most frequent visitors.
+  - **Status Code Distribution**: Summarizes requests by category (2xx, 3xx, 4xx, 5xx).
+  - **Top 5 Accessed Paths**: Shows the most requested URLs.
+- **Rich Terminal UI**: Displays summaries in elegant tables using the `rich` library.
 
 ## Requirements
 
 - Python 3.x
+- `rich` library
 
 ## Installation
 
-No external dependencies are required. Simply clone the repository and run the script.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/esousa97/py-log-analyzer.git
+   cd py-log-analyzer
+   ```
 
-```bash
-git clone https://github.com/esousa97/py-log-analyzer.git
-cd py-log-analyzer
-```
+2. Install dependencies:
+   ```bash
+   pip install rich
+   ```
 
 ## Usage
 
@@ -40,20 +43,24 @@ python py-log-analyzer.py <path_to_log_file>
 python py-log-analyzer.py access.log
 ```
 
-## Output Format
+## Output Example
 
-The tool outputs a JSON-formatted list of parsed entries:
+The tool displays elegant tables in the terminal:
 
-```json
-[
-    {
-        "ip": "127.0.0.1",
-        "timestamp": "10/Oct/2000:13:55:36 -0700",
-        "method": "GET",
-        "url": "/index.html",
-        "status": "200"
-    }
-]
+```text
+       Top 10 IP Addresses
+┏━━━━━━━━━━━━━┳━━━━━━━━━━┓
+┃ IP Address  ┃ Requests ┃
+┡━━━━━━━━━━━━━╇━━━━━━━━━━┩
+│ 127.0.0.1   │       15 │
+└─────────────┴──────────┘
+
+   Requests by Status Code
+┏━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┓
+┃ Category           ┃ Count ┃
+┡━━━━━━━━━━━━━━━━━━━━╇━━━━━━━┩
+│ 2xx (Success)      │    20 │
+└────────────────────┴───────┘
 ```
 
 ## License
