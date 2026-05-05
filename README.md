@@ -3,6 +3,8 @@
 
 <p>High-performance modular CLI tool to parse, analyze and audit Nginx/Apache logs with interactive dashboards and anomaly detection.</p>
 
+  <img src="assets/python.png" alt="py-log-analyzer banner" width="600px">
+
   <br>
 
 [![CI](https://github.com/esousa97/py-log-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/esousa97/py-log-analyzer/actions/workflows/ci.yml)
