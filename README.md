@@ -167,6 +167,6 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 Made with ❤️ by [Enoque Sousa](https://github.com/esousa97)
 
-**Project status:** Project Status: Study project
+**Project status:** Study project
 
 </div>
