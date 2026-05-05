@@ -31,7 +31,9 @@ jobs:
       run: bandit -r . -x ./tests
 
     - name: Run tests with Pytest
-      run: pytest --cov=. --cov-report=xml
+      run: pytest --cov=py_log_analyzer --cov-report=xml
+      env:
+        PYTHONPATH: .
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
