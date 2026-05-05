@@ -13,6 +13,9 @@ A lightweight CLI tool to parse and analyze Nginx/Apache log files using Regular
   - **Suspicious IP Activity**: Detects IPs with more than 50 errors (401/404).
   - **Error Rate Calculation**: Calculates the total error percentage.
   - **Service Health Alerts**: Displays a critical alert if 5xx errors exceed a configurable threshold.
+- **Report Export**:
+  - **JSON**: Export raw analysis data for further processing.
+  - **HTML**: Generate a visually appealing, interactive report with charts (Chart.js) and tables.
 - **Rich Terminal UI**: Displays summaries and alerts in elegant tables and panels using the `rich` library.
 
 ## Requirements
@@ -47,20 +50,27 @@ A lightweight CLI tool to parse and analyze Nginx/Apache log files using Regular
 Run the script by providing the path to your log file as an argument:
 
 ```bash
-python py-log-analyzer.py <path_to_log_file> [--threshold <percentage>]
+python py-log-analyzer.py <path_to_log_file> [options]
 ```
 
 ### Options
 
-- `--threshold`: (Optional) 5xx error rate threshold to trigger a "Critical Health" alert. Default is `5.0`.
+- `--threshold <float>`: 5xx error rate threshold for critical alert (default: `5.0`).
+- `--format {json,html}`: Export the report to `report.json` or `report.html`.
 
-### Example
+### Examples
 
+**Standard analysis:**
 ```bash
-python py-log-analyzer.py access.log --threshold 2.5
+python py-log-analyzer.py access.log
 ```
 
-## Output Example
+**Exporting to HTML with custom threshold:**
+```bash
+python py-log-analyzer.py access.log --threshold 2.0 --format html
+```
+
+## Output Example (Terminal)
 
 The tool displays elegant tables and alerts in the terminal:
 
@@ -71,11 +81,6 @@ Anomaly Detected: Suspicious IP Activity
 ┡━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━┩
 │ 10.10.10.10 │             52 │
 └─────────────┴────────────────┘
-
-╭─────────────────────────────────────────╮
-│  CRITICAL SERVICE HEALTH                │
-│ 5xx Error Rate: 6.25% (Threshold: 5.0%) │
-╰─────────────────────────────────────────╯
 
        Top 10 IP Addresses
 ┏━━━━━━━━━━━━━┳━━━━━━━━━━┓
