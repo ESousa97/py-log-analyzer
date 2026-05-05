@@ -4,15 +4,11 @@ import sys
 from collections import Counter
 from rich.console import Console
 from rich.table import Table
+from rich.panel import Panel
 
 def parse_log_line(line):
     # Common Log Format (CLF) regex
     # Example: 127.0.0.1 - - [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326
-    # Pattern explanation:
-    # (?P<ip>\S+) -> IP address
-    # .*?\[(?P<timestamp>.*?)\] -> Skip until [timestamp]
-    # "(?P<method>\S+)\s+(?P<url>\S+)\s+.*?" -> "METHOD URL PROTOCOL"
-    # \s+(?P<status>\d{3}) -> Status code
     
     regex = r'(?P<ip>\S+) .*?\[(?P<timestamp>.*?)\] "(?P<method>\S+)\s+(?P<url>\S+)\s+.*?"\s+(?P<status>\d{3})'
     match = re.search(regex, line)
@@ -20,8 +16,28 @@ def parse_log_line(line):
         return match.groupdict()
     return None
 
-def display_summary(logs):
+def detect_anomalies(logs, console):
+    # Detect IPs with more than 50 401 or 404 errors
+    suspicious_ips = Counter()
+    for log in logs:
+        if log['status'] in ('401', '404'):
+            suspicious_ips[log['ip']] += 1
+    
+    anomalies = {ip: count for ip, count in suspicious_ips.items() if count > 50}
+    
+    if anomalies:
+        table = Table(title="[bold red]Anomaly Detected: Suspicious IP Activity[/bold red]", border_style="red")
+        table.add_column("IP Address", style="bright_red")
+        table.add_column("401/404 Errors", justify="right")
+        for ip, count in anomalies.items():
+            table.add_row(ip, str(count))
+        console.print(table)
+    else:
+        console.print("[bold green]No IP anomalies detected (threshold > 50 errors).[/bold green]")
+
+def display_summary(logs, error_threshold_5xx):
     console = Console()
+    total_logs = len(logs)
     
     # Aggregate data
     ip_counts = Counter(log['ip'] for log in logs)
@@ -45,6 +61,17 @@ def display_summary(logs):
         elif status.startswith('5'):
             status_categories["5xx (Server Error)"] += 1
 
+    # Anomaly Detection
+    detect_anomalies(logs, console)
+
+    # Health Check
+    total_errors = status_categories["4xx (Client Error)"] + status_categories["5xx (Server Error)"]
+    error_rate = (total_errors / total_logs) * 100
+    rate_5xx = (status_categories["5xx (Server Error)"] / total_logs) * 100
+
+    if rate_5xx >= error_threshold_5xx:
+        console.print(Panel(f"[bold white on red] CRITICAL SERVICE HEALTH [/bold white on red]\n5xx Error Rate: {rate_5xx:.2f}% (Threshold: {error_threshold_5xx}%)", expand=False))
+    
     # Top 10 IPs Table
     ip_table = Table(title="Top 10 IP Addresses")
     ip_table.add_column("IP Address", style="cyan")
@@ -69,11 +96,14 @@ def display_summary(logs):
     console.print(ip_table)
     console.print(status_table)
     console.print(url_table)
-    console.print(f"\n[bold green]Total requests processed: {len(logs)}[/bold green]")
+    
+    console.print(f"\n[bold green]Total requests processed: {total_logs}[/bold green]")
+    console.print(f"[bold]Total Error Rate: {error_rate:.2f}%[/bold]")
 
 def main():
     parser = argparse.ArgumentParser(description="Analyze Nginx/Apache log files.")
     parser.add_argument("file", help="Path to the log file")
+    parser.add_argument("--threshold", type=float, default=5.0, help="5xx error threshold for critical health alert (default: 5.0%%)")
     args = parser.parse_args()
 
     logs = []
@@ -84,7 +114,6 @@ def main():
                 if parsed:
                     logs.append(parsed)
                 else:
-                    # Only show warning if line is not empty
                     if line.strip():
                         print(f"Warning: Could not parse line: {line.strip()}", file=sys.stderr)
     except FileNotFoundError:
@@ -95,7 +124,7 @@ def main():
         sys.exit(1)
 
     if logs:
-        display_summary(logs)
+        display_summary(logs, args.threshold)
     else:
         print("No valid log entries found.")
 
