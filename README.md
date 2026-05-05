@@ -167,6 +167,6 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 Made with ❤️ by [Enoque Sousa](https://github.com/esousa97)
 
-**Project status:** Production Ready — Implementation roadmap completed
+**Project status:** Project Status: Study project
 
 </div>
