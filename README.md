@@ -1,5 +1,7 @@
 # Python Log Analyzer
 
+![Python CI](https://github.com/esousa97/py-log-analyzer/actions/workflows/ci.yml/badge.svg)
+
 A lightweight CLI tool to parse and analyze Nginx/Apache log files with high performance and parallel processing.
 
 ## Features
@@ -52,7 +54,7 @@ docker build -t py-log-analyzer .
 Run the script providing one or more log files:
 
 ```bash
-python py-log-analyzer.py access.log access.log.1 [options]
+python py_log_analyzer.py access.log access.log.1 [options]
 ```
 
 ### Docker Usage
@@ -60,7 +62,7 @@ python py-log-analyzer.py access.log access.log.1 [options]
 Mount your logs directory and run the container:
 
 ```bash
-docker run --rm -v $(pwd):/logs py-log-analyzer /logs/access.log --format html
+docker run --rm -v $(pwd):/logs py_log_analyzer /logs/access.log --format html
 ```
 
 ### Options

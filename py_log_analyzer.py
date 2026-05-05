@@ -158,6 +158,10 @@ def export_html(report_data, output_file):
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(html_template)
 
+def detect_anomalies(suspicious_ips, threshold=50):
+    """Detect IPs with more than the threshold of 401/404 errors."""
+    return {ip: count for ip, count in suspicious_ips.items() if count > threshold}
+
 def display_summary(merged_data, error_threshold_5xx, export_format=None):
     console = Console()
     total_requests = merged_data['total_count']
@@ -172,7 +176,7 @@ def display_summary(merged_data, error_threshold_5xx, export_format=None):
     suspicious_ips = merged_data['suspicious_ips']
     
     status_categories = get_status_categories(status_counts)
-    anomalies = {ip: count for ip, count in suspicious_ips.items() if count > 50}
+    anomalies = detect_anomalies(suspicious_ips)
 
     total_errors = status_categories["4xx (Client Error)"] + status_categories["5xx (Server Error)"]
     error_rate = (total_errors / total_requests) * 100

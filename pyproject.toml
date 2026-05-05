@@ -1,0 +1,16 @@
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "W", "I", "B"]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[tool.coverage.run]
+source = ["."]
+omit = ["tests/*"]

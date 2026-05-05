@@ -1,0 +1,46 @@
+{
+    "total_requests": 4,
+    "error_rate": 50.0,
+    "rate_5xx": 0.0,
+    "threshold": 5.0,
+    "is_critical": false,
+    "status_distribution": {
+        "2xx (Success)": 2,
+        "3xx (Redirection)": 0,
+        "4xx (Client Error)": 2,
+        "5xx (Server Error)": 0
+    },
+    "top_ips": [
+        [
+            "127.0.0.1",
+            2
+        ],
+        [
+            "192.168.1.1",
+            1
+        ],
+        [
+            "10.0.0.5",
+            1
+        ]
+    ],
+    "top_paths": [
+        [
+            "/index.html",
+            1
+        ],
+        [
+            "/login",
+            1
+        ],
+        [
+            "/images/logo.png",
+            1
+        ],
+        [
+            "/not-found",
+            1
+        ]
+    ],
+    "anomalies": {}
+}
