@@ -17,7 +17,7 @@
 
 ---
 
-**py-log-analyzer** is a command-line tool designed for high-performance analysis of web server logs (Nginx/Apache). It features memory-efficient parsing using generators, parallel file processing via multiprocessing, and comprehensive reporting. It identifies traffic patterns, status code distributions, and suspicious IP activity (anomalies), exporting results to **JSON** or interactive **HTML dashboards**. The console entry point is `py-log-analyzer`. Canonical repository: `github.com/esousa97/py-log-analyzer`.
+**py-log-analyzer** is a command-line tool designed for high-performance analysis of web server logs (Nginx/Apache). It features memory-efficient parsing using generators, parallel file processing via multiprocessing, and comprehensive reporting. It identifies traffic patterns, status code distributions, and suspicious IP activity (anomalies), optionally enriched with **geographic breakdown by country** (MaxMind GeoLite2 via `geoip2`), exporting results to **JSON** or interactive **HTML dashboards**. The console entry point is `py-log-analyzer`. Canonical repository: `github.com/esousa97/py-log-analyzer`.
 
 ## Demo (quick smoke test)
 
@@ -52,6 +52,7 @@ py-log-analyzer access.log --format html --threshold 2.5
 | Parsing | High-speed regex parsing of Common Log Format (CLF). |
 | Performance | Memory-efficient generators and multi-core `multiprocessing` support. |
 | Security | Anomaly detection for suspicious IPs (401/404 spikes). |
+| GeoIP | Optional **country** labels and request totals per country using GeoLite2-Country (local `.mmdb` file). |
 | Health | Service health monitoring with configurable 5xx error thresholds. |
 | Export | Interactive **HTML reports** with Chart.js or structured **JSON**. |
 | UI | Elegant terminal tables and panels powered by `rich`. |
@@ -62,6 +63,7 @@ py-log-analyzer access.log --format html --threshold 2.5
 | --------- | ---- |
 | Python 3.10+ | Language and runtime |
 | rich | Terminal UI and tables |
+| geoip2 | MaxMind GeoIP database reader (GeoLite2-Country) |
 | Chart.js | Interactive HTML visualizations |
 | pytest | Unit testing and coverage |
 
@@ -69,6 +71,7 @@ py-log-analyzer access.log --format html --threshold 2.5
 
 - Python **3.10+** and `pip`.
 - Optional: **Docker** for containerized execution.
+- Optional: **GeoLite2-Country** database (`GeoLite2-Country.mmdb`) from MaxMind for geographic analysis (see [GeoIP](#geoip-traffic-by-country)).
 
 ## Installation and usage
 
@@ -88,6 +91,45 @@ docker build -t py-log-analyzer .
 docker run --rm -v "$PWD:/logs" py-log-analyzer /logs/access.log --format html
 ```
 
+To use GeoIP inside Docker, mount the MaxMind database as well (path inside the container is arbitrary; adjust to match your host file):
+
+```bash
+docker run --rm -v "$PWD:/logs" -v "/path/on/host/GeoLite2-Country.mmdb:/data/GeoLite2-Country.mmdb:ro" \
+  py-log-analyzer /logs/access.log --geoip-db /data/GeoLite2-Country.mmdb --format html
+```
+
+## GeoIP (traffic by country)
+
+When you pass `--geoip-db` pointing to a local **GeoLite2-Country** MMDB file, the tool resolves each distinct client IP once and:
+
+- Adds a **Country** column to anomaly and top-IP tables in the terminal.
+- Prints **Traffic by Country** (top 15 countries by request count).
+- Includes **`country_distribution`**, **`anomalies_detail`**, and per-row **`country`** in **JSON** exports.
+- Adds a **Traffic by Country** chart and country column in **HTML** reports.
+
+Private, loopback, and link-local addresses are labeled **Private / local** without querying the database.
+
+### Obtain the free GeoLite2 database
+
+1. Create a free MaxMind account and download **GeoLite2 Country** (`.mmdb`) from [GeoLite2 signup](https://www.maxmind.com/en/geolite2/signup).
+2. Unpack the archive and note the path to `GeoLite2-Country.mmdb`.
+
+### Examples
+
+**Linux / macOS**
+
+```bash
+py-log-analyzer access.log --geoip-db ./GeoLite2-Country.mmdb --format html
+```
+
+**Windows (PowerShell)**
+
+```powershell
+py-log-analyzer access.log --geoip-db "D:\data\GeoLite2-Country.mmdb" --format json
+```
+
+Omit `--geoip-db` to run without geographic enrichment (same behavior as before GeoIP was added).
+
 ## Documentation
 
 | Document | Contents |
@@ -99,7 +141,7 @@ docker run --rm -v "$PWD:/logs" py-log-analyzer /logs/access.log --format html
 ## CLI summary
 
 ```bash
-py-log-analyzer FILES [FILES ...] [--threshold PERCENT] [--format json|html]
+py-log-analyzer FILES [FILES ...] [--threshold PERCENT] [--format json|html] [--geoip-db PATH]
 ```
 
 ## Tests
@@ -116,6 +158,7 @@ pytest --cov=py_log_analyzer
 | `py_log_analyzer/parser.py` | Log parsing and generators |
 | `py_log_analyzer/analyzer.py` | Data aggregation and anomaly detection |
 | `py_log_analyzer/exporter.py` | JSON and HTML report generation |
+| `py_log_analyzer/geoip.py` | GeoLite2 country lookup and aggregation |
 | `py_log_analyzer/cli.py` | CLI orchestration and Terminal UI |
 | `py_log_analyzer/__main__.py` | Module entry point |
 | `tests/` | `pytest` suite |
@@ -127,6 +170,7 @@ pytest --cov=py_log_analyzer
 | `ModuleNotFoundError` | Package not installed | Run `pip install .` or `pip install -e .` |
 | `Permission Denied` | File access issues | Check log file permissions or use `sudo` if necessary. |
 | `MemoryError` | Large file loading | The tool uses generators, but check if `--format html` with extreme log sizes is a factor. |
+| GeoIP shows no countries / errors opening DB | Wrong path, missing file, or not the Country MMDB | Use the full path to `GeoLite2-Country.mmdb`; ensure the file is readable by the process (and mounted in Docker if applicable). |
 
 ## Study roadmap (completed)
 

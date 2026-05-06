@@ -3,12 +3,59 @@ import json
 
 def export_json(report_data, output_file):
     """Export analysis results to a JSON file."""
-    with open(output_file, "w") as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         json.dump(report_data, f, indent=4)
 
 
 def export_html(report_data, output_file):
     """Export analysis results to a styled HTML report with Chart.js."""
+    geo_enabled = report_data.get("geo_enabled") and report_data.get("country_distribution")
+
+    top_ips_header = (
+        "<th>IP Address</th><th>Requests</th><th>Country</th>"
+        if geo_enabled
+        else "<th>IP Address</th><th>Requests</th>"
+    )
+    top_ips_rows = ""
+    for row in report_data["top_ips"]:
+        country_cell = f"<td>{row.get('country') or ''}</td>" if geo_enabled else ""
+        top_ips_rows += f"<tr><td>{row['ip']}</td><td>{row['requests']}</td>{country_cell}</tr>"
+
+    country_chart_block = ""
+    if geo_enabled:
+        cd = report_data["country_distribution"]
+        labels = list(cd.keys())[:12]
+        values = [cd[k] for k in labels]
+        country_chart_block = """
+            <div class="card">
+                <h2>Traffic by Country</h2>
+                <canvas id="countryChart"></canvas>
+            </div>
+        """
+        country_script = f"""
+            const countryCtx = document.getElementById('countryChart').getContext('2d');
+            new Chart(countryCtx, {{
+                type: 'bar',
+                data: {{
+                    labels: {json.dumps(labels)},
+                    datasets: [{{
+                        label: 'Requests',
+                        data: {json.dumps(values)},
+                        backgroundColor: '#2196f3'
+                    }}]
+                }},
+                options: {{
+                    indexAxis: 'y',
+                    responsive: true,
+                    plugins: {{ legend: {{ display: false }} }}
+                }}
+            }});
+        """
+    else:
+        country_script = ""
+
+    grid_geo_class = "grid-geo" if geo_enabled else ""
+
     html_template = f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -22,6 +69,7 @@ def export_html(report_data, output_file):
             .container {{ max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
             h1, h2 {{ color: #333; }}
             .grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }}
+            .grid-geo {{ grid-template-columns: 1fr 1fr; }}
             .card {{ border: 1px solid #ddd; padding: 15px; border-radius: 8px; }}
             table {{ width: 100%; border-collapse: collapse; margin-top: 10px; }}
             th, td {{ padding: 10px; text-align: left; border-bottom: 1px solid #eee; }}
@@ -34,6 +82,7 @@ def export_html(report_data, output_file):
     <body>
         <div class="container">
             <h1>Log Analysis Report</h1>
+            {"<p><strong>GeoIP:</strong> MaxMind GeoLite2 Country (traffic shown by country)</p>" if geo_enabled else ""}
 
             <div class="health-panel {'health-critical' if report_data['is_critical'] else ''}">
                 <strong>Service Health:</strong> { 'CRITICAL' if report_data['is_critical'] else 'HEALTHY' }<br>
@@ -60,13 +109,14 @@ def export_html(report_data, output_file):
                 </div>
             </div>
 
-            <div class="grid">
-                <div class="card" style="grid-column: span 2;">
+            <div class="grid {grid_geo_class}">
+                {country_chart_block if geo_enabled else ''}
+                <div class="card" style="{'grid-column: span 2;' if not geo_enabled else ''}">
                     <h2>Top 10 IP Addresses</h2>
                     <table>
-                        <thead><tr><th>IP Address</th><th>Requests</th></tr></thead>
+                        <thead><tr>{top_ips_header}</tr></thead>
                         <tbody>
-                            {''.join([f"<tr><td>{ip}</td><td>{c}</td></tr>" for ip, c in report_data['top_ips']])}
+                            {top_ips_rows}
                         </tbody>
                     </table>
                 </div>
@@ -85,6 +135,7 @@ def export_html(report_data, output_file):
                     }}]
                 }}
             }});
+            {country_script}
         </script>
     </body>
     </html>

@@ -6,6 +6,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "rich>=15.0.0",
+        "geoip2>=4.8.0",
     ],
     entry_points={
         "console_scripts": [
