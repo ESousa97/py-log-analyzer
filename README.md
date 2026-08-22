@@ -7,17 +7,17 @@
 
   <br>
 
-[![CI](https://github.com/esousa97/py-log-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/esousa97/py-log-analyzer/actions/workflows/ci.yml)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat&logo=python&logoColor=white)](https://github.com/esousa97/py-log-analyzer/blob/master/pyproject.toml)
+[![CI](https://github.com/enoquesousa/py-log-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/enoquesousa/py-log-analyzer/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat&logo=python&logoColor=white)](https://github.com/enoquesousa/py-log-analyzer/blob/master/pyproject.toml)
 [![Rich](https://img.shields.io/badge/rich-15.0%2B-green?style=flat&logo=python&logoColor=white)](https://github.com/Textualize/rich)
-[![License](https://img.shields.io/github/license/esousa97/py-log-analyzer)](https://github.com/esousa97/py-log-analyzer/blob/master/LICENSE)
-[![Last Commit](https://img.shields.io/github/last-commit/esousa97/py-log-analyzer)](https://github.com/esousa97/py-log-analyzer/commits/master)
+[![License](https://img.shields.io/github/license/enoquesousa/py-log-analyzer)](https://github.com/enoquesousa/py-log-analyzer/blob/master/LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/enoquesousa/py-log-analyzer)](https://github.com/enoquesousa/py-log-analyzer/commits/master)
 
 </div>
 
 ---
 
-**py-log-analyzer** is a command-line tool designed for high-performance analysis of web server logs (Nginx/Apache). It features memory-efficient parsing using generators, parallel file processing via multiprocessing, and comprehensive reporting. It identifies traffic patterns, status code distributions, and suspicious IP activity (anomalies), optionally enriched with **geographic breakdown by country** (MaxMind GeoLite2 via `geoip2`), exporting results to **JSON** or interactive **HTML dashboards**. The console entry point is `py-log-analyzer`. Canonical repository: `github.com/esousa97/py-log-analyzer`.
+**py-log-analyzer** is a command-line tool designed for high-performance analysis of web server logs (Nginx/Apache). It features memory-efficient parsing using generators, parallel file processing via multiprocessing, and comprehensive reporting. It identifies traffic patterns, status code distributions, and suspicious IP activity (anomalies), optionally enriched with **geographic breakdown by country** (MaxMind GeoLite2 via `geoip2`), exporting results to **JSON** or interactive **HTML dashboards**. The console entry point is `py-log-analyzer`. Canonical repository: `github.com/enoquesousa/py-log-analyzer`.
 
 ## Demo (quick smoke test)
 
@@ -78,7 +78,7 @@ py-log-analyzer access.log --format html --threshold 2.5
 ### From source (recommended)
 
 ```bash
-git clone https://github.com/esousa97/py-log-analyzer.git
+git clone https://github.com/enoquesousa/py-log-analyzer.git
 cd py-log-analyzer
 pip install .
 py-log-analyzer --help
@@ -204,12 +204,12 @@ See [CHANGELOG.md](CHANGELOG.md).
 **Enoque Sousa**
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/enoque-sousa-bb89aa168/)
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=flat&logo=github&logoColor=white)](https://github.com/esousa97)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=flat&logo=github&logoColor=white)](https://github.com/enoquesousa)
 [![Portfolio](https://img.shields.io/badge/Portfolio-FF5722?style=flat&logo=target&logoColor=white)](https://enoquesousa.vercel.app)
 
 **[⬆ Back to Top](#py-log-analyzer)**
 
-Made with ❤️ by [Enoque Sousa](https://github.com/esousa97)
+Made with ❤️ by [Enoque Sousa](https://github.com/enoquesousa)
 
 **Project status:** Study project
 
